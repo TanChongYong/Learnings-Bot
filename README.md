@@ -47,5 +47,5 @@ This file contains the logic flow for deciding which sequence of logic to execut
 
 <h2>Ending</h2>
 
-This bot is created by Tan Chong Yong. You can follow me on my blog to read about my learnings and thoughts of things that interest me, particulary tech,investment and startup related stuff.
+This bot is created by Tan Chong Yong. You can follow me on my blog to read about my learnings and thoughts of things that interest me, particulary tech,investment and startup related stuff. You can access the bot here: http://telegram.me/CY_CheckInBot.
 
