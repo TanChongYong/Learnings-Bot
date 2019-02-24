@@ -50,30 +50,66 @@ def handle_updates(updates):
     for update in updates["result"]:
         text = update["message"]["text"]
         chat = update["message"]["chat"]["id"]
-        items = db.get_items(chat)  ##
+        items = db.get_items(chat)  ##  
+        status = db.get_status(chat) ##currentrly return empty arary 
+        today = datetime.datetime.now().strftime("%d-%m")
+        print(status)
         if text == "/done":
             keyboard = build_keyboard(items)
             send_message("Select an item to delete", chat, keyboard)
-        elif text == "/checkin": 
-            currentDT = datetime.datetime.now() 
-            message = "You have checked-in on: " + currentDT.strftime("%d-%m-%Y")+ " at " + currentDT.strftime("%H:%M")
-            send_message(message, chat)
-        elif text.startswith("/checkout"):
-                   new_text = text.replace('/checkout', '')
-                   db.add_item(new_text, chat) ## 
+        elif text == "/checkin" and len(status) == 0: 
+            checkedInTime = datetime.datetime.now() 
+            message = "You have checked-in on: " + checkedInTime.strftime("%d-%m-%Y")+ " at " + checkedInTime.strftime("%H:%M")
+            send_message(message, chat) 
+            db.checkin_status("checkedin",checkedInTime, chat) ##  
+            print(len(status)) 
+        elif text == "/checkin" and len(status) != 0: 
+            message = "You are already checked-in!" 
+            send_message(message, chat)  
+        elif text.startswith("/checkout") and len(status) != 0:
+                   new_text = text.replace('/checkout', '')  
                    items = db.get_items(chat)  ## 
-                   currentDT = datetime.datetime.now() 
-                   header = "You have checked-out on: " + currentDT.strftime("%d-%m-%Y")+ " at " + currentDT.strftime("%H:%M")
-                   message = header + "\n".join(items)
-                   send_message(message, chat)
+                   checkedOutTime = datetime.datetime.now()   
+                   checkedinTimeArray = db.get_checkinTime(chat)  
+                   checkedinTime = checkedinTimeArray[0]  
+                   date_time_obj = datetime.datetime.strptime(checkedinTime, '%Y-%m-%d %H:%M:%S.%f')
+                   diff = checkedOutTime - date_time_obj  
+                   print(diff.days, diff.seconds)
+                   days,seconds = diff.days,diff.seconds
+                   hours = round(diff.seconds/3600)
+                   minutes = round(diff.seconds/60)
+                   seconds = round(diff.seconds)
+                   print(hours,minutes,seconds)  
+                   duration = str(hours) + "hours,"+ str(minutes)+"minutes,"+str(seconds)+"seconds."
+                   db.add_item(new_text,today,duration,chat) ## 
+                   header = "*You have checked-out on: " + checkedOutTime.strftime("%d-%m-%Y")+ " at " + checkedOutTime.strftime("%H:%M")+".You have done the following: *"
+                   message = header + "\n" + new_text + "\n" + "You have checked in for " + str(hours) + "h,"+str(minutes) +"min,"+str(seconds)+"seconds."
+                   db.delete_status("checkedin", chat) ## 
+                   send_message(message, chat) 
+        elif text.startswith("/checkout") and len(status) == 0: 
+                   message = "You cannot check out without checking in!" 
+                   send_message(message, chat)  
+        elif text.startswith("/summary"):
+            items = db.get_summary(today) 
+            message = ""
+            for row in items: 
+               item = row[0]  
+               date = row[1] 
+               duration = row[2] 
+               owner = row[3]
+               print("Id = ", row[0], )
+               print("Name = ", row[1]) 
+               message += "\n"+ item + " " + date + " " + duration + " "+ owner
+            #message = "\n".join(items) 
+            send_message(message, chat)
         elif text.startswith("/"): 
-            send_message("Sorry bro, any message starting with / is rejected except /checkin", chat)
+            send_message("Sorry bro, don't try and game the system eh", chat)
             continue
         elif text in items:
             db.delete_item(text, chat)  ##
             items = db.get_items(chat)  ##
             keyboard = build_keyboard(items)
-            send_message("Select an item to delete", chat, keyboard)
+            send_message("Select an item to delete", chat, keyboard) 
         else:
            ## db.add_item(text, chat)  ##
             ##items = db.get_items(chat)  ##
