@@ -52,9 +52,10 @@ def handle_updates(updates):
     for update in updates["result"]:
         text = update["message"]["text"]
         userId = update["message"]["chat"]["id"] 
+        userName = update["message"]["chat"]["first_name"] 
         status = db.get_status(userId)
         today = datetime.datetime.now().strftime("%d-%m")
-        message = check_commands(text,userId) 
+        message = check_commands(text,userId,userName)
         send_message(message,userId) 
 
 def main(): 

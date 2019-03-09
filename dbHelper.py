@@ -7,7 +7,7 @@ class DBHelper:
         self.conn = sqlite3.connect(dbname)
 
     def setup(self):
-        tblstmt = "CREATE TABLE IF NOT EXISTS items (description text, date text, duration text,owner text)" 
+        tblstmt = "CREATE TABLE IF NOT EXISTS items (description text, date text, duration text,owner text, ownerName text)" 
         statusStmt = "CREATE TABLE IF NOT EXISTS status (status text, checkinTime DATETIME, owner text)"
         itemidx = "CREATE INDEX IF NOT EXISTS itemIndex ON items (description ASC)" 
         ownidx = "CREATE INDEX IF NOT EXISTS ownIndex ON items (owner ASC)" 
@@ -19,9 +19,9 @@ class DBHelper:
         self.conn.execute(statusidx)
         self.conn.commit()
 
-    def add_item(self, item_text,today, duration,owner): 
-        stmt = "INSERT INTO items (description,date, duration,owner) VALUES (?, ?, ?, ?)"
-        args = (item_text,today, duration,owner)
+    def add_item(self, item_text,today, duration,owner,ownerName): 
+        stmt = "INSERT INTO items (description,date, duration,owner,ownerName) VALUES (?, ?, ?, ?, ?)"
+        args = (item_text,today, duration,owner,ownerName)
         self.conn.execute(stmt, args)
         self.conn.commit()
 
